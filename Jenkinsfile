@@ -1,21 +1,7 @@
-pipeline {
-    agent any
-
-    environment {
-        // This tool allows us to run the scanner command
-        scannerHome = tool 'SonarQubeScanner' 
-    }
-
-    stages {
-        stage('Build') {
+stage('Code Analysis') {
             steps {
-                echo 'Building...'
-            }
-        }
-        
-        stage('Code Analysis') {
-            steps {
-                // This step sends the code to SonarQube
+                echo 'Analyzing code quality...'
+                // 1. Send code to SonarQube
                 withSonarQubeEnv('SonarQube') {
                     sh "${scannerHome}/bin/sonar-scanner \
                     -Dsonar.projectKey=my-first-analysis \
@@ -23,5 +9,12 @@ pipeline {
                 }
             }
         }
-    }
-}
+        
+        stage('Quality Gate') {
+            steps {
+                // 2. Wait for SonarQube to say "OK" or "FAIL"
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
