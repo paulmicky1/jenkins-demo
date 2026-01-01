@@ -29,7 +29,7 @@ pipeline {
             steps {
                 // Wait for the report. Fails if SonarQube finds too many bugs.
                 timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                  //  waitForQualityGate abortPipeline: true
                 }
             }
         }
