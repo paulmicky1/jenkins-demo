@@ -2,16 +2,23 @@ pipeline {
     agent any
 
     environment {
-        // Define the name of our image
-        IMAGE_NAME = "my-jenkins-app"
-        // Setup SonarQube Scanner Tool
+        // This ensures Jenkins installs and links the scanner tool
         scannerHome = tool 'SonarQubeScanner'
     }
 
     stages {
-        stage('Code Analysis') {
+        stage('Build') {
             steps {
-                echo 'Checking code quality...'
+                echo 'Building...'
+                // Create a dummy file to simulate a build artifact
+                sh 'echo "version 1.0" > my-app.txt'
+            }
+        }
+        
+       stage('Code Analysis') {
+            steps {
+                echo 'Analyzing code...'
+                // The name inside '...' must match the Server Name in Manage Jenkins > System
                 withSonarQubeEnv('SonarQube') {
                     sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins-demo -Dsonar.sources=."
                 }
@@ -20,25 +27,10 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
+                // Wait for the report. Fails if SonarQube finds too many bugs.
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
-            }
-        }
-
-        stage('Build Image') {
-            steps {
-                echo 'Building Docker Image...'
-                // This command builds the image using the Dockerfile
-                sh "docker build -t ${IMAGE_NAME}:v1 ."
-            }
-        }
-
-        stage('Test Image') {
-            steps {
-                echo 'Verifying Image...'
-                // Verify the image was actually created
-                sh "docker images | grep ${IMAGE_NAME}"
             }
         }
     }
