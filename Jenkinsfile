@@ -15,11 +15,11 @@ pipeline {
             }
         }
         
-        stage('Code Analysis') {
+    stage('Code Analysis') {
             steps {
                 echo 'Analyzing code...'
-                withSonarQubeEnv('SonarQubeScanner') {
-                    // Note: We use the tool variable ${scannerHome} here
+                // The name inside '...' must match the Server Name in Manage Jenkins > System
+                withSonarQubeEnv('SonarQube') {
                     sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins-demo -Dsonar.sources=."
                 }
             }
